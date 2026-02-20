@@ -42,7 +42,7 @@ router.delete(
       if (existing.mainImageId) idsToDelete.add(existing.mainImageId);
 
       /* extra images */
-      (existing.extraImagesId || []).forEach((id) => id && idsToDelete.add(id));
+      (existing.extraImagesId || []).forEach((id: any) => id && idsToDelete.add(id));
 
       /* product-details images */
       (existing.productDetails || []).forEach((d: any) => {

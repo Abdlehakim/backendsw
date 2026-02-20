@@ -13,9 +13,15 @@
     "start": "node -r module-alias/register dist/app.js",
     "start:api": "node -r module-alias/register dist/app.js",
     "start:worker": "node -r module-alias/register dist/jobs/invoiceWorker.js",
-    "worker:invoice": "node -r module-alias/register dist/jobs/invoiceWorker.js"
+    "worker:invoice": "node -r module-alias/register dist/jobs/invoiceWorker.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "ts-node -r tsconfig-paths/register prisma/seed.ts",
+    "mongo:import": "ts-node -r tsconfig-paths/register tools/mongo-to-mysql.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.2",
     "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.58.5",
@@ -27,10 +33,12 @@
     "ioredis": "^5.7.0",
     "jose": "^6.0.10",
     "jsonwebtoken": "^9.0.2",
+    "mingo": "^6.6.1",
     "module-alias": "^2.2.3",
-    "mongoose": "^8.10.0",
+    "mongodb": "^7.1.0",
     "multer": "^2.0.2",
     "nodemailer": "^6.10.0",
+    "prisma": "^6.16.2",
     "puppeteer": "^24.17.1",
     "react-icons": "^5.5.0"
   },

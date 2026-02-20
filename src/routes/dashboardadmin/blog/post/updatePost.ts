@@ -1,6 +1,5 @@
 // routes/dashboardadmin/blog/posts/updatePost.ts
 import { Router, Request, Response } from 'express';
-import { Types } from 'mongoose';
 import Post, { IPost } from '@/models/blog/Post';
 import { requirePermission } from '@/middleware/requireDashboardPermission';
 import { memoryUpload } from '@/lib/multer';
@@ -57,10 +56,10 @@ router.put(
       if (title?.trim()) update.title = title.trim();
       if (description !== undefined) update.description = description.trim();
       if (vadmin) update.vadmin = vadmin;
-      if (postCategorie) update.postCategorie = new Types.ObjectId(postCategorie);
+      if (postCategorie) update.postCategorie = String(postCategorie);
       if (postSubCategorie !== undefined)
         update.postSubCategorie = postSubCategorie
-          ? new Types.ObjectId(postSubCategorie)
+          ? String(postSubCategorie)
           : null;
 
       // 3) Parse incoming subsections JSON

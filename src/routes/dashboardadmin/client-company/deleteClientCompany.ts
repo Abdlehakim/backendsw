@@ -3,7 +3,7 @@
    DELETE /api/dashboardadmin/clientCompany/delete/:id
 ------------------------------------------------------------------ */
 import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
+import { ObjectId } from "@/db/objectId";
 
 import ClientCompany from "@/models/ClientCompany";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
@@ -11,7 +11,7 @@ import { requirePermission } from "@/middleware/requireDashboardPermission";
 const router = Router();
 
 /* ---------- helpers ---------- */
-const isValidId = (id: string) => mongoose.Types.ObjectId.isValid(id);
+const isValidId = (id: string) => ObjectId.isValid(id);
 
 /**
  * DELETE /delete/:id

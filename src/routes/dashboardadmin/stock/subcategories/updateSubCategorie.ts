@@ -1,7 +1,6 @@
 // routes/dashboardadmin/stock/subcategories/updateSubCategorie.ts
 
 import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
 import SubCategorie, { ISubCategorie } from "@/models/stock/SubCategorie";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
 import { memoryUpload } from "@/lib/multer";
@@ -61,7 +60,7 @@ router.put(
             updateData.vadmin = vadmin as "approve" | "not-approve";
           }
           if (typeof categorie === "string") {
-            updateData.categorie = new mongoose.Types.ObjectId(categorie);
+            updateData.categorie = String(categorie);
           }
 
           // 3) replace icon if new file

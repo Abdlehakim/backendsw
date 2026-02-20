@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
-import mongoose from 'mongoose';
 import DashboardUser from '@/models/dashboardadmin/DashboardUser';
 import DashboardRole from '@/models/dashboardadmin/DashboardRole';
+import { isValidObjectId } from '@/db/objectId';
 import { requirePermission } from '@/middleware/requireDashboardPermission';
 
 const router = Router();
@@ -16,7 +16,7 @@ router.put(
     const { userId } = req.params;
     const { roleId } = req.body;
 
-    if (!mongoose.isValidObjectId(userId) || !mongoose.isValidObjectId(roleId)) {
+    if (!isValidObjectId(userId) || !isValidObjectId(roleId)) {
       res.status(400).json({ message: 'Invalid userId or roleId.' });
       return;
     }

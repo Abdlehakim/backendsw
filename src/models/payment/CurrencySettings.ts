@@ -1,48 +1,32 @@
-// ───────────────────────────────────────────────────────────────
-// src/models/checkout/CurrencySettings.ts
-// Stores the site-wide currency configuration
-// ───────────────────────────────────────────────────────────────
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { createCompatModel } from "@/db/mongooseCompat";
 
-export interface ICurrencySettings extends Document {
-  _id: Types.ObjectId;
-  primary: string;  
-  secondaries: string[]; 
+export interface ICurrencySettings {
+  _id: string;
+  primary: string;
+  secondaries: string[];
+  createdAt?: Date;
   updatedAt?: Date;
 }
 
-const CurrencySettingsSchema = new Schema<ICurrencySettings>(
-  {
-    primary: {
-      type: String,
-      required: true,
-      uppercase: true,
-      minlength: 3,
-      maxlength: 3,         
-      trim: true,
-    },
-    secondaries: {
-      type: [String],
-      default: [],
-      set: (arr: string[]) => [...new Set(arr.map((c) => c.toUpperCase()))],
-    },
+const CurrencySettings = createCompatModel({
+  modelName: "CurrencySettings",
+  delegate: "currencySettings",
+  collectionName: "currencysettings",
+  defaults: {
+    primary: "TND",
+    secondaries: [],
   },
-  { timestamps: { createdAt: false, updatedAt: true } }
-);
+  beforeSave: (doc) => {
+    if (typeof doc.primary === "string") {
+      doc.primary = doc.primary.toUpperCase();
+    }
+    const secondary = Array.isArray(doc.secondaries) ? doc.secondaries : [];
+    doc.secondaries = Array.from(new Set(secondary.map((c) => String(c).toUpperCase())));
 
-/* ---------- custom validation: primary must be unique ---------- */
-CurrencySettingsSchema.pre("validate", function (next) {
-  if (this.secondaries.includes(this.primary)) {
-    return next(
-      new Error("Primary currency must not appear in 'secondaries' array.")
-    );
-  }
-  next();
+    if (doc.secondaries.includes(doc.primary)) {
+      throw new Error("Primary currency must not appear in 'secondaries' array.");
+    }
+  },
 });
-
-/* ---------- model ---------- */
-const CurrencySettings: Model<ICurrencySettings> =
-  mongoose.models.CurrencySettings ||
-  mongoose.model<ICurrencySettings>("CurrencySettings", CurrencySettingsSchema);
 
 export default CurrencySettings;

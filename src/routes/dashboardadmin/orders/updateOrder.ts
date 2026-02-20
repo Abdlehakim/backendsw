@@ -4,7 +4,7 @@
 ------------------------------------------------------------------ */
 
 import express, { Request, Response } from "express";
-import mongoose from "mongoose";
+import { ObjectId, isObjectIdOrHexString } from "@/db/objectId";
 
 import Order, { IOrder } from "@/models/Order";
 import Client from "@/models/Client";
@@ -18,18 +18,18 @@ const router = express.Router();
 /** Return a usable id only if it's an ObjectId or a 24-hex string. */
 function keepId(v: any): any | undefined {
   // allow ObjectId instance
-  if (v instanceof mongoose.Types.ObjectId) return v;
+  if (v instanceof ObjectId) return v;
   // allow 24-hex strings
-  if (typeof v === "string" && mongoose.isObjectIdOrHexString(v)) return v;
+  if (typeof v === "string" && isObjectIdOrHexString(v)) return v;
   // allow objects with {_id} or {id}
   const cand = v && (v._id ?? v.id);
-  if (typeof cand === "string" && mongoose.isObjectIdOrHexString(cand)) return cand;
-  if (cand instanceof mongoose.Types.ObjectId) return cand;
+  if (typeof cand === "string" && isObjectIdOrHexString(cand)) return cand;
+  if (cand instanceof ObjectId) return cand;
   return undefined;
 }
 
 async function resolveClientName(id: string): Promise<string | null> {
-  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  if (!ObjectId.isValid(id)) return null;
 
   const account = await Client.findById(id).select("username").lean<{ username?: string }>();
   if (account) return account.username ?? "";
@@ -157,7 +157,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     const { orderId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!ObjectId.isValid(orderId)) {
       res.status(400).json({ message: "Paramètre orderId invalide." });
       return;
     }
@@ -173,7 +173,7 @@ router.patch(
       // client / clientName
       if (typeof rawClientId !== "undefined") {
         if (rawClientId) {
-          if (!mongoose.isObjectIdOrHexString(rawClientId)) {
+          if (!isObjectIdOrHexString(rawClientId)) {
             res.status(400).json({ message: "Identifiant client invalide." });
             return;
           }

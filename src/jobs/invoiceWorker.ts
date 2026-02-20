@@ -1,22 +1,14 @@
 // src/jobs/invoiceWorker.ts
 import { Worker, QueueEvents } from "bullmq";
-import mongoose from "mongoose";
 import { INVOICE_QUEUE } from "@/jobs/invoiceQueue";
 import { redis as connection } from "@/jobs/redis";
 import { createFactureFromOrder } from "@/services/factureService";
 import Order from "@/models/Order";
 
-async function connectDB() {
-  if (mongoose.connection.readyState === 1) return;
-  if (!process.env.MONGODB_URI) throw new Error("MONGODB_URI not set");
-  await mongoose.connect(process.env.MONGODB_URI);
-}
-
 export const invoiceWorker = new Worker(
   INVOICE_QUEUE,
   async (job) => {
     if (job.name !== "create-invoice") return;
-    await connectDB();
 
     const { orderId, eta, scheduledAt } = job.data as {
       orderId: string;
@@ -35,7 +27,7 @@ export const invoiceWorker = new Worker(
     // Mark the order as invoiced on success or if it already existed
     if ((result.ok && result.ref) || result.already) {
       try {
-        await Order.updateOne({ _id: orderId }, { $set: { Invoice: true } }).exec();
+        await Order.updateOne({ _id: orderId }, { $set: { Invoice: true } });
         job.log(`[invoiceWorker] set Invoice=true for order=${orderId}`);
       } catch (e) {
         job.log(

@@ -1,11 +1,6 @@
-// src/models/blog/Post.ts
+import { createCompatModel, utils } from "@/db/mongooseCompat";
+import { generateRef, slugify } from "@/models/_helpers";
 
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-import crypto from 'crypto';
-
-/**
- * Recursive subsection interface allowing unlimited nesting
- */
 export interface IPostSubsection {
   title: string;
   description: string;
@@ -14,126 +9,58 @@ export interface IPostSubsection {
   children: IPostSubsection[];
 }
 
-/**
- * Blog post interface with Cloudinary image IDs
- */
-export interface IPost extends Document {
+export interface IPost {
+  _id: string;
   title: string;
   description: string;
   imageUrl: string;
   imageId: string;
   reference: string;
   slug: string;
-  vadmin: 'not-approve' | 'approve';
-  postCategorie: Types.ObjectId;
-  postSubCategorie?: Types.ObjectId | null;
-  author: Types.ObjectId;
+  vadmin: "not-approve" | "approve";
+  postCategorie: string;
+  postSubCategorie?: string | null;
+  author: string;
   subsections: IPostSubsection[];
-  createdBy: Types.ObjectId;
-  updatedBy?: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
+  createdBy: string;
+  updatedBy?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-// Extend Model to include commentCount static
-export interface PostModel extends Model<IPost> {
-  commentCount(postId: Types.ObjectId | string): Promise<number>;
+export interface PostModel {
+  commentCount(postId: string): Promise<number>;
 }
 
-/* helpers */
-const generatePostReference = (): string =>
-  'ps' + crypto.randomBytes(3).toString('hex').toLowerCase();
-
-const slugify = (s: string): string =>
-  s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '');
-
-/* recursive subsection schema */
-const SubsectionSchema = new Schema<IPostSubsection>(
-  {
-    title: { type: String, required: true },
-    description: { type: String },
-    // Images in subsections are optional
-    imageUrl: { type: String,},
-    imageId: { type: String,},
+const Post = createCompatModel({
+  modelName: "Post",
+  delegate: "post",
+  collectionName: "posts",
+  uniqueFields: ["title", "reference", "slug"],
+  defaults: {
+    vadmin: "not-approve",
+    postSubCategorie: null,
+    subsections: [],
+    updatedBy: null,
   },
-  { _id: true }
-);
-SubsectionSchema.add({ children: { type: [SubsectionSchema], default: [] } });
-
-/* main post schema */
-const PostSchema = new Schema<IPost>(
-  {
-    title: { type: String, required: true, unique: true, index: true },
-    description: { type: String, required: true },
-    // Main section image is required
-    imageUrl: { type: String, required: true },
-    imageId: { type: String, required: true },
-    reference: { type: String, required: true, unique: true, index: true },
-    slug: { type: String, unique: true },
-    vadmin: {
-      type: String,
-      enum: ['not-approve', 'approve'],
-      default: 'not-approve',
-    },
-    postCategorie: {
-      type: Schema.Types.ObjectId,
-      ref: 'PostCategorie',
-      required: true,
-    },
-    postSubCategorie: {
-      type: Schema.Types.ObjectId,
-      ref: 'PostSubCategorie',
-      default: null,
-    },
-    author: { type: Schema.Types.ObjectId, ref: 'DashboardUser', required: true },
-    subsections: { type: [SubsectionSchema], default: [] },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'DashboardUser', required: true },
-    updatedBy: { type: Schema.Types.ObjectId, ref: 'DashboardUser', default: null },
+  relations: {
+    postCategorie: { model: "PostCategorie" },
+    postSubCategorie: { model: "PostSubCategorie" },
+    author: { model: "DashboardUser" },
+    createdBy: { model: "DashboardUser" },
+    updatedBy: { model: "DashboardUser" },
   },
-  { timestamps: true }
-);
-
-/* pre-validate hook: generate reference */
-PostSchema.pre<IPost>('validate', async function (next) {
-  if (this.isNew) {
-    let ref: string;
-    let exists: IPost | null;
-    do {
-      ref = generatePostReference();
-      exists = await mongoose.models.Post.findOne({ reference: ref });
-    } while (exists);
-    this.reference = ref;
-  }
-  next();
+  beforeSave: (doc) => {
+    if (!doc.reference) doc.reference = generateRef("ps", "lower");
+    if (doc.title) doc.slug = slugify(String(doc.title));
+    doc.subsections = utils.normalizeValue(doc.subsections ?? []);
+  },
+  statics: {
+    async commentCount(postId: string) {
+      const { default: PostComment } = await import("@/models/blog/PostComment");
+      return (PostComment as any).countDocuments({ post: String(postId) });
+    },
+  },
 });
-
-/* pre-save hook: slugify title */
-PostSchema.pre<IPost>('save', function (next) {
-  if (this.isModified('title')) {
-    this.slug = slugify(this.title);
-  }
-  next();
-});
-
-/* static method: count comments */
-PostSchema.statics.commentCount = async function (
-  postId: Types.ObjectId | string
-): Promise<number> {
-  return mongoose.model('PostComment').countDocuments({ post: postId });
-};
-
-// Include virtuals and statics in JSON output
-PostSchema.set('toJSON', { virtuals: true });
-PostSchema.set('toObject', { virtuals: true });
-
-// Export model with static
-const Post = (mongoose.models.Post as PostModel) ||
-  mongoose.model<IPost, PostModel>('Post', PostSchema);
 
 export default Post;

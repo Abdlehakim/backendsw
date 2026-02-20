@@ -2,8 +2,8 @@
    src/routes/client/order/postOrderClient.ts
 ------------------------------------------------------------------ */
 import express, { Request, Response } from "express";
-import mongoose from "mongoose";
 import { authenticateToken } from "@/middleware/authenticateToken";
+import { isValidObjectId, ObjectId } from "@/db/objectId";
 import Order from "@/models/Order";
 import Client from "@/models/Client";
 import PaymentMethod from "@/models/payment/PaymentMethods";
@@ -62,10 +62,6 @@ interface BodyPayload {
   paymentMethodId?: string;
   deliveryMethod?: ReqDeliveryMethodItem[];
   items?: ReqItem[];
-}
-
-function isValidObjectId(id?: string): id is string {
-  return !!id && mongoose.isValidObjectId(id);
 }
 
 interface AuthenticatedRequest extends Request {
@@ -148,7 +144,7 @@ router.post(
       const orderItems = items.map((item) => {
         const productId = item?._id;
         const attrs: {
-          attribute: mongoose.Types.ObjectId;
+          attribute: ObjectId;
           name: string;
           value: string;
         }[] = [];
@@ -160,7 +156,7 @@ router.post(
             const val = (a?.value || "").trim();
             if (!isValidObjectId(id) || !nm || !val) continue;
             attrs.push({
-              attribute: new mongoose.Types.ObjectId(id),
+              attribute: new ObjectId(id),
               name: nm,
               value: val,
             });
@@ -169,7 +165,7 @@ router.post(
 
         return {
           product: isValidObjectId(productId)
-            ? new mongoose.Types.ObjectId(productId)
+            ? new ObjectId(productId)
             : undefined,
           reference: String(item.reference ?? ""),
           name: String(item.name ?? ""),
@@ -188,7 +184,7 @@ router.post(
       }
 
       const deliveryAddressDoc: {
-        AddressID: mongoose.Types.ObjectId;
+        AddressID: ObjectId;
         DeliverToAddress: string;
       }[] = [];
       if (hasDelivery && Array.isArray(DeliveryAddress)) {
@@ -203,14 +199,14 @@ router.post(
             return;
           }
           deliveryAddressDoc.push({
-            AddressID: new mongoose.Types.ObjectId(rawId),
+            AddressID: new ObjectId(rawId),
             DeliverToAddress: deliverTo,
           });
         }
       }
 
       const pickupMagasinDoc: {
-        MagasinID: mongoose.Types.ObjectId;
+        MagasinID: ObjectId;
         MagasinAddress: string;
         MagasinName: string;
       }[] = [];
@@ -227,7 +223,7 @@ router.post(
             return;
           }
           pickupMagasinDoc.push({
-            MagasinID: new mongoose.Types.ObjectId(rawId),
+            MagasinID: new ObjectId(rawId),
             MagasinAddress: addr,
             MagasinName: name || "",
           });
@@ -265,7 +261,7 @@ router.post(
             return;
           }
           pickupMagasinDoc.push({
-            MagasinID: new mongoose.Types.ObjectId(rawId),
+            MagasinID: new ObjectId(rawId),
             MagasinAddress: addr,
             MagasinName: name || "",
           });
@@ -303,7 +299,7 @@ router.post(
       }
 
       const deliveryMethodDoc: {
-        deliveryMethodID: mongoose.Types.ObjectId;
+        deliveryMethodID: ObjectId;
         deliveryMethodName: string;
         Cost: string;
         expectedDeliveryDate?: Date;
@@ -339,7 +335,7 @@ router.post(
         }
 
         deliveryMethodDoc.push({
-          deliveryMethodID: new mongoose.Types.ObjectId(id),
+          deliveryMethodID: new ObjectId(id),
           deliveryMethodName: finalName,
           Cost: finalCost,
           ...(expected ? { expectedDeliveryDate: expected } : {}),
@@ -355,7 +351,7 @@ router.post(
       }
 
       type PaymentMethodLean = {
-        _id: mongoose.Types.ObjectId;
+        _id: ObjectId;
         label?: string;
         name?: string;
       };

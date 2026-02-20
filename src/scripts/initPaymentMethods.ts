@@ -12,7 +12,7 @@ export default async function initPaymentMethods(): Promise<void> {
       requireAddress: PAYMENT_METHOD_META[key]?.requireAddress ?? EMPTY_METHOD_CFG.requireAddress,
     };
 
-    let doc = (await PaymentMethod.findOne({ name: key })) as IPaymentMethod | null;
+    let doc = (await PaymentMethod.findOne({ name: key })) as any;
 
     if (!doc) {
       await PaymentMethod.create({ ...EMPTY_METHOD_CFG, ...desired });

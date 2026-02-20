@@ -1,0 +1,327 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("clients")
+}
+
+model ClientShop {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("clientshops")
+}
+
+model ClientCompany {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("clientcompanies")
+}
+
+model Address {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("addresses")
+}
+
+model Permission {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("permissions")
+}
+
+model DashboardRole {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("dashboardroles")
+}
+
+model DashboardUser {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("dashboardusers")
+}
+
+model DeliveryOption {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("deliveryoptions")
+}
+
+model PaymentMethod {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("paymentmethods")
+}
+
+model CurrencySettings {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("currencysettings")
+}
+
+model ProductAttribute {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("productattributes")
+}
+
+model Brand {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("brands")
+}
+
+model Categorie {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("categories")
+}
+
+model SubCategorie {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("subcategories")
+}
+
+model Magasin {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("magasins")
+}
+
+model Product {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("products")
+}
+
+model Review {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("reviews")
+}
+
+model Order {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("orders")
+}
+
+model Facture {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("factures")
+}
+
+model FactureCounter {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("facture_counters")
+}
+
+model PostCategorie {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("postcategories")
+}
+
+model PostSubCategorie {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("postsubcategories")
+}
+
+model Post {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("posts")
+}
+
+model PostComment {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("postcomments")
+}
+
+model CompanyData {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("companydata")
+}
+
+model ContactInfo {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("contactinfo")
+}
+
+model HomePageData {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("homepagedata")
+}
+
+model SpecialPageBanner {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("specialpagebanners")
+}
+
+model WebsiteTitres {
+  id        String   @id @db.VarChar(24)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("websitetitres")
+}

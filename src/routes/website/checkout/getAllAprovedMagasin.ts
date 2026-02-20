@@ -13,7 +13,7 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
       .lean();
 
     res.json(
-      mags.map((m) => ({
+      (mags as any[]).map((m: any) => ({
         _id: m._id.toString(),
         name: m.name,
         address: m.address ?? "",

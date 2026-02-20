@@ -1,24 +1,22 @@
-///models/dashboardadmin/DashboardRole
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import { createCompatModel } from "@/db/mongooseCompat";
 
-export interface IDashboardRole extends Document {
+export interface IDashboardRole {
+  _id: string;
   name: string;
   description?: string;
   permissions?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const DashboardRoleSchema: Schema<IDashboardRole> = new Schema<IDashboardRole>(
-  {
-    name: { type: String, required: true, unique: true },
-    description: { type: String },
-    permissions: { type: [String], default: [] },
+const DashboardRole = createCompatModel({
+  modelName: "DashboardRole",
+  delegate: "dashboardRole",
+  collectionName: "dashboardroles",
+  uniqueFields: ["name"],
+  defaults: {
+    permissions: [],
   },
-  { timestamps: true }
-);
-
-const DashboardRole: Model<IDashboardRole> = mongoose.model<IDashboardRole>(
-  'DashboardRole',
-  DashboardRoleSchema
-);
+});
 
 export default DashboardRole;

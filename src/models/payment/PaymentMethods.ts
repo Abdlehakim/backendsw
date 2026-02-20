@@ -1,46 +1,35 @@
-// src/models/payment/PaymentMethods.ts
-import mongoose, { Schema, Document, Model } from "mongoose";
-import {
-  PAYMENT_METHOD_KEYS,
-  PaymentMethodKey,
-} from "@/constants/paymentMethodsData";
+import { createCompatModel } from "@/db/mongooseCompat";
+import { PAYMENT_METHOD_KEYS, PaymentMethodKey } from "@/constants/paymentMethodsData";
 
-/* ---------- interface ---------- */
-export interface IPaymentMethod extends Document {
+export interface IPaymentMethod {
+  _id: string;
   name: PaymentMethodKey;
   enabled: boolean;
   label?: string;
   help?: string;
   payOnline: boolean;
   requireAddress: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const paymentSettingschema = new Schema<IPaymentMethod>(
-  {
-    name: {
-      type: String,
-      enum: PAYMENT_METHOD_KEYS,
-      required: true,
-      unique: true,
-    },
-    enabled: { type: Boolean, required: true, default: false },
-    label: { type: String, trim: true, default: "" },
-    help: { type: String, trim: true, default: "" },
-
-    payOnline: { type: Boolean, required: true, default: false, index: true },
-
-    requireAddress: {
-      type: Boolean,
-      required: true,
-      default: false,
-      index: true,
-    },
+const PaymentMethod = createCompatModel({
+  modelName: "PaymentMethod",
+  delegate: "paymentMethod",
+  collectionName: "paymentmethods",
+  uniqueFields: ["name"],
+  defaults: {
+    enabled: false,
+    label: "",
+    help: "",
+    payOnline: false,
+    requireAddress: false,
   },
-  { timestamps: true }
-);
-
-const PaymentMethod: Model<IPaymentMethod> =
-  mongoose.models.PaymentMethod ||
-  mongoose.model<IPaymentMethod>("PaymentMethod", paymentSettingschema);
+  beforeSave: (doc) => {
+    if (doc.name && !PAYMENT_METHOD_KEYS.includes(doc.name)) {
+      throw new Error("Invalid payment method key.");
+    }
+  },
+});
 
 export default PaymentMethod;

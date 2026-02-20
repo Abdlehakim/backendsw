@@ -1,7 +1,6 @@
 // src/pages/api/dashboardadmin/stock/brands/create.ts
 
 import { Router, Request, Response } from "express";
-import { Types } from "mongoose";
 import Brand, { IBrand } from "@/models/stock/Brand";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
 import { memoryUpload } from "@/lib/multer";
@@ -38,7 +37,7 @@ router.post(
       }
 
       // --- get current user ---
-      const userId = req.dashboardUser?._id as Types.ObjectId | undefined;
+      const userId = req.dashboardUser?._id ? String(req.dashboardUser._id) : undefined;
       if (!userId) {
         res.status(401).json({ success: false, message: "Unauthorized." });
         return;

@@ -1,8 +1,7 @@
-// models/websitedata/companyData.ts
+import { createCompatModel } from "@/db/mongooseCompat";
 
-import mongoose, { Schema, Document, Model } from 'mongoose';
-
-export interface ICompanyData extends Document {
+export interface ICompanyData {
+  _id: string;
   name: string;
   bannerImageUrl: string;
   bannerImageId: string;
@@ -13,7 +12,7 @@ export interface ICompanyData extends Document {
   description: string;
   email: string;
   phone: string;
-  vat: string;           
+  vat: string;
   address: string;
   city: string;
   zipcode: string;
@@ -21,107 +20,21 @@ export interface ICompanyData extends Document {
   facebook?: string;
   linkedin?: string;
   instagram?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const companyDataSchema = new Schema<ICompanyData>(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    bannerImageUrl: {
-      type: String,
-      required: true,
-    },
-    bannerImageId: {
-      type: String,
-      required: true,
-    },
-    logoImageUrl: {
-      type: String,
-      required: true,
-    },
-    logoImageId: {
-      type: String,
-      required: true,
-    },
-    contactBannerUrl: {
-      type: String,
-      required: false,
-    },
-    contactBannerId: {
-      type: String,
-      required: false,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-    },
-    vat: {               
-      type: String,
-      required: true,
-      trim: true,
-    },
-    address: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    city: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    zipcode: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    governorate: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    facebook: {
-      type: String,
-      trim: true,
-    },
-    linkedin: {
-      type: String,
-      trim: true,
-    },
-    instagram: {
-      type: String,
-      trim: true,
-    },
-  },
-  { timestamps: true }
-);
-
-// Prevent creating more than one document
-companyDataSchema.pre('save', async function (next) {
-  const Model = this.constructor as Model<ICompanyData>;
-  if (this.isNew) {
-    const count = await Model.countDocuments();
-    if (count > 0) {
-      return next(new Error('CompanyData already exists. Use update instead.'));
+const CompanyData = createCompatModel({
+  modelName: "CompanyData",
+  delegate: "companyData",
+  collectionName: "companydata",
+  beforeSave: async (_doc, ctx) => {
+    if (!ctx.isNew) return;
+    const existing = await (CompanyData as any).countDocuments({});
+    if (existing > 0) {
+      throw new Error("CompanyData already exists. Use update instead.");
     }
-  }
-  next();
+  },
 });
-
-const CompanyData: Model<ICompanyData> =
-  mongoose.models.CompanyData ||
-  mongoose.model<ICompanyData>('CompanyData', companyDataSchema);
 
 export default CompanyData;

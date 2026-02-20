@@ -2,8 +2,8 @@
    src/routes/client/order/postOrderClient.ts
 ------------------------------------------------------------------ */
 import express, { Request, Response } from "express";
-import mongoose from "mongoose";
 import { authenticateToken } from "@/middleware/authenticateToken";
+import { ObjectId } from "@/db/objectId";
 import Order from "@/models/Order";
 import Client from "@/models/Client";
 
@@ -95,17 +95,17 @@ router.post(
 
       const deliveryAddressDoc = hasDelivery
         ? DeliveryAddress!.map((d) => ({
-            AddressID: new mongoose.Types.ObjectId(d.Address),
+            AddressID: new ObjectId(d.Address),
             DeliverToAddress: d.DeliverToAddress ?? "",
           }))
         : [];
 
-      let pickupMagasinDoc: { MagasinID: mongoose.Types.ObjectId; MagasinAddress: string }[] = [];
+      let pickupMagasinDoc: { MagasinID: ObjectId; MagasinAddress: string }[] = [];
       if (hasPickup) {
         if (typeof pickupStore === "string") {
           pickupMagasinDoc = [
             {
-              MagasinID: new mongoose.Types.ObjectId(pickupStore),
+              MagasinID: new ObjectId(pickupStore),
               MagasinAddress: "",
             },
           ];
@@ -113,7 +113,7 @@ router.post(
           const id = pickupStore.id || "";
           pickupMagasinDoc = [
             {
-              MagasinID: new mongoose.Types.ObjectId(id),
+              MagasinID: new ObjectId(id),
               MagasinAddress: pickupStore.address || "",
             },
           ];
@@ -122,7 +122,7 @@ router.post(
 
       const paymentMethodArray = [
         {
-          PaymentMethodID: new mongoose.Types.ObjectId(
+          PaymentMethodID: new ObjectId(
             paymentMethodId
           ),
           PaymentMethodLabel: paymentMethod,

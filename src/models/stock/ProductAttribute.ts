@@ -1,59 +1,36 @@
-// src/models/stock/ProductAttribute.ts
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { createCompatModel } from "@/db/mongooseCompat";
 
-/* ---------- types ---------- */
 export type AttributeType = "dimension" | "color" | "other type";
 
-export interface IProductAttribute extends Document {
+export interface IProductAttribute {
+  _id: string;
   name: string;
   type: AttributeType | AttributeType[];
-  createdBy: Types.ObjectId;
-  updatedBy?: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
+  createdBy: string;
+  updatedBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-/* ---------- schema ---------- */
 const ALLOWED: AttributeType[] = ["dimension", "color", "other type"];
 
-const ProductAttributeSchema = new Schema<IProductAttribute>(
-  {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-
-    // accept a single string or an array of strings
-    type: {
-      type: [String],
-      required: true,
-      enum: ALLOWED,
-      validate: {
-        validator: (v: string | string[]) =>
-          Array.isArray(v) ? v.length > 0 : ALLOWED.includes(v as AttributeType),
-        message:
-          "Type must include at least one of 'dimension', 'color', or 'other type'.",
-      },
-    },
-
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: "DashboardUser",
-      required: true,
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "DashboardUser",
-    },
+const ProductAttribute = createCompatModel({
+  modelName: "ProductAttribute",
+  delegate: "productAttribute",
+  collectionName: "productattributes",
+  uniqueFields: ["name"],
+  relations: {
+    createdBy: { model: "DashboardUser" },
+    updatedBy: { model: "DashboardUser" },
   },
-  { timestamps: true }
-);
-
-/* ---------- model ---------- */
-const ProductAttribute: Model<IProductAttribute> =
-  mongoose.models.ProductAttribute ||
-  mongoose.model<IProductAttribute>("ProductAttribute", ProductAttributeSchema);
+  beforeSave: (doc) => {
+    const values = Array.isArray(doc.type) ? doc.type : [doc.type];
+    const normalized = values.map((v: string) => String(v).trim());
+    if (!normalized.length || normalized.some((v: string) => !ALLOWED.includes(v as AttributeType))) {
+      throw new Error("Type must include at least one of 'dimension', 'color', or 'other type'.");
+    }
+    doc.type = normalized;
+  },
+});
 
 export default ProductAttribute;

@@ -1,20 +1,17 @@
-// models/Permission.ts
-import mongoose, { Document, Model, Schema } from 'mongoose';
+import { createCompatModel } from "@/db/mongooseCompat";
 
-export interface IPermission extends Document {
+export interface IPermission {
+  _id: string;
   key: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const PermissionSchema = new Schema<IPermission>(
-  {
-    key: { type: String, required: true, unique: true },
-  },
-  { timestamps: true }
-);
-
-const PermissionModel: Model<IPermission> = mongoose.model<IPermission>(
-  'Permission',
-  PermissionSchema
-);
+const PermissionModel = createCompatModel({
+  modelName: "Permission",
+  delegate: "permission",
+  collectionName: "permissions",
+  uniqueFields: ["key"],
+});
 
 export default PermissionModel;

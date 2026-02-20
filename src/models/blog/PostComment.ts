@@ -1,56 +1,33 @@
-// models/blog/PostComment.ts
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { createCompatModel } from "@/db/mongooseCompat";
 
-/* ------------------------------------------------------------------ */
-/* Types                                                              */
-/* ------------------------------------------------------------------ */
-export interface IPostComment extends Document {
-  post: Types.ObjectId;
-  /** ID of the author (Client or DashboardUser)                        */
-  author: Types.ObjectId;
-  /** Tells Mongoose which collection to populate (`Client` or `DashboardUser`) */
-  authorModel: 'Client' | 'DashboardUser';
+export interface IPostComment {
+  _id: string;
+  post: string;
+  author: string;
+  authorModel: "Client" | "DashboardUser";
   content: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-/* ------------------------------------------------------------------ */
-/* Schema                                                             */
-/* ------------------------------------------------------------------ */
-const PostCommentSchema = new Schema<IPostComment>(
-  {
-    post: {
-      type: Schema.Types.ObjectId,
-      ref: 'Post',
-      required: true,
-    },
-
-    /** -----------------------------------------------
-     *  Flexible author — can be a Client *or* DashboardUser
-     *  --------------------------------------------- */
+const PostComment = createCompatModel({
+  modelName: "PostComment",
+  delegate: "postComment",
+  collectionName: "postcomments",
+  relations: {
+    post: { model: "Post" },
     author: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      refPath: 'authorModel', // <─ dynamic ref
+      resolver: async (value, parent) => {
+        const id = String((value as any)?._id ?? value);
+        if (parent?.authorModel === "DashboardUser") {
+          const { default: DashboardUser } = await import("@/models/dashboardadmin/DashboardUser");
+          return (DashboardUser as any).findById(id).lean();
+        }
+        const { default: Client } = await import("@/models/Client");
+        return (Client as any).findById(id).lean();
+      },
     },
-    authorModel: {
-      type: String,
-      required: true,
-      enum: ['Client', 'DashboardUser'],
-    },
-
-    /** Comment content */
-    content: { type: String, required: true },
   },
-  { timestamps: true }
-);
-
-/* ------------------------------------------------------------------ */
-/* Model                                                              */
-/* ------------------------------------------------------------------ */
-const PostComment: Model<IPostComment> =
-  mongoose.models.PostComment ||
-  mongoose.model<IPostComment>('PostComment', PostCommentSchema);
+});
 
 export default PostComment;

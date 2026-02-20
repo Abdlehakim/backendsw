@@ -1,23 +1,22 @@
 // src/db.ts
-import mongoose from "mongoose";
+import prisma from "@/db/prisma";
+
 if (process.env.NODE_ENV !== "production") {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require("dotenv").config();
 }
 
-const mongoURI = process.env.MONGODB_URI;
-
-if (!mongoURI) {
-  console.error("Error: MONGODB_URI environment variable is not defined.");
+if (!process.env.DATABASE_URL) {
+  console.error("Error: DATABASE_URL environment variable is not defined.");
   process.exit(1);
 }
 
-mongoose
-  .connect(mongoURI)
+prisma
+  .$connect()
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("Connected to MySQL via Prisma");
   })
   .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
+    console.error("Error connecting to MySQL:", err);
     process.exit(1);
   });

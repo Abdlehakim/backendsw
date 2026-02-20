@@ -3,7 +3,7 @@
    GET /api/dashboardadmin/orders/:orderId
 ------------------------------------------------------------------ */
 import { Router, Request, Response } from "express";
-import mongoose, { Types } from "mongoose";
+import { ObjectId } from "@/db/objectId";
 
 import Order from "@/models/Order";
 import Client from "@/models/Client";
@@ -14,7 +14,7 @@ import { requirePermission } from "@/middleware/requireDashboardPermission";
 const router = Router();
 
 async function resolveClient(
-  id: Types.ObjectId | string,
+  id: ObjectId | string,
 ): Promise<
   | {
       _id: string;
@@ -74,7 +74,7 @@ router.get(
     const { orderId } = req.params;
 
     /* ---------- validation ---------- */
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!ObjectId.isValid(orderId)) {
       res.status(400).json({ message: "Invalid order ID." });
       return;
     }
@@ -89,7 +89,7 @@ router.get(
 
       /* ---------- extract client ID (populated or not) ---------- */
       const clientIdRaw =
-        (orderDoc.client as any)?._id ?? (orderDoc.client as Types.ObjectId);
+        (orderDoc.client as any)?._id ?? (orderDoc.client as ObjectId);
 
       const client = await resolveClient(clientIdRaw);
 

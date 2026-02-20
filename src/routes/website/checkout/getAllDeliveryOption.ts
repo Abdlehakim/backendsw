@@ -10,7 +10,7 @@ router.get("/", async (_req: Request, res: Response) => {
       .sort({ price: 1 })
       .lean();
 
-    const result = options.map((o) => ({
+    const result = (options as any[]).map((o: any) => ({
       id: o._id.toString(),
       name: o.name,
       description: o.description ?? "",

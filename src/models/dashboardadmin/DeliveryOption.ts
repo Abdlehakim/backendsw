@@ -1,77 +1,32 @@
-// ───────────────────────────────────────────────────────────────
-// src/models/checkout/DeliveryOption.ts
-// ───────────────────────────────────────────────────────────────
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import { createCompatModel } from "@/db/mongooseCompat";
 
-export interface IDeliveryOption extends Document {
-  _id: Types.ObjectId;
+export interface IDeliveryOption {
+  _id: string;
   name: string;
   description?: string;
   price: number;
   estimatedDays: number;
   isActive: boolean;
-
-  /** ⇩ NOUVEAU : retrait en magasin ? */
   isPickup: boolean;
-
-  createdBy: Types.ObjectId;
-  updatedBy?: Types.ObjectId;
-
+  createdBy: string;
+  updatedBy?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-const DeliveryOptionSchema = new Schema<IDeliveryOption>(
-  {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
-    },
-    description: {
-      type: String,
-      trim: true,
-      maxlength: 250,
-    },
-    price: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    estimatedDays: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 60,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-
-    isPickup: {
-      type: Boolean,
-      default: false,
-    },
-
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: "DashboardUser",
-      required: true,
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "DashboardUser",
-    },
+const DeliveryOption = createCompatModel({
+  modelName: "DeliveryOption",
+  delegate: "deliveryOption",
+  collectionName: "deliveryoptions",
+  uniqueFields: ["name"],
+  defaults: {
+    isActive: true,
+    isPickup: false,
   },
-  { timestamps: true }
-);
-
-const DeliveryOption: Model<IDeliveryOption> =
-  mongoose.models.DeliveryOption ||
-  mongoose.model<IDeliveryOption>("DeliveryOption", DeliveryOptionSchema);
+  relations: {
+    createdBy: { model: "DashboardUser" },
+    updatedBy: { model: "DashboardUser" },
+  },
+});
 
 export default DeliveryOption;

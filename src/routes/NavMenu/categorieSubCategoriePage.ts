@@ -3,7 +3,7 @@
 /*  (FULL FILE — now includes /allSlugs endpoint)                     */
 /* ------------------------------------------------------------------ */
 import { Router } from "express";
-import { Types }  from "mongoose";
+import { ObjectId } from "@/db/objectId";
 
 import Categorie    from "@/models/stock/Categorie";
 import Subcategorie from "@/models/stock/SubCategorie";
@@ -98,7 +98,7 @@ router.get("/categorie/:categorieId", async (req, res) => {
       vadmin: "approve",
     })
       .select("name slug")
-      .lean<{ _id: Types.ObjectId; name: string; slug: string }[]>()
+      .lean<{ _id: ObjectId; name: string; slug: string }[]>()
       .exec();
 
     res.json(subs);
@@ -142,9 +142,9 @@ router.get("/products/:slug", async (req, res) => {
       vadmin: "approve",
     };
 
-    if (brand)    match.brand        = new Types.ObjectId(brand);
-    if (magasin) match.magasin     = new Types.ObjectId(magasin);
-    if (subCat)   match.subcategorie = new Types.ObjectId(subCat);
+    if (brand)    match.brand        = new ObjectId(brand);
+    if (magasin) match.magasin     = new ObjectId(magasin);
+    if (subCat)   match.subcategorie = new ObjectId(subCat);
 
     /* … rest of the aggregation pipeline stays identical … */
     const pipeline: any[] = [

@@ -3,7 +3,7 @@
    GET /api/dashboardadmin/factures/:fcid
 ------------------------------------------------------------------ */
 import { Router, Request, Response } from "express";
-import mongoose, { Types } from "mongoose";
+import { ObjectId } from "@/db/objectId";
 
 import Facture from "@/models/Facture";
 import Client from "@/models/Client";
@@ -15,7 +15,7 @@ const router = Router();
 
 /* ---------- resolve client (same approach as orders route) ---------- */
 async function resolveClient(
-  id: Types.ObjectId | string,
+  id: ObjectId | string,
 ): Promise<
   | {
       _id: string;
@@ -73,7 +73,7 @@ router.get(
     const { fcid } = req.params;
 
     // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(fcid)) {
+    if (!ObjectId.isValid(fcid)) {
       res.status(400).json({ message: "Invalid facture ID." });
       return;
     }
@@ -87,7 +87,7 @@ router.get(
       }
 
       // Optional: resolve linked client (like orders route)
-      const clientIdRaw = fcDoc.client as any as Types.ObjectId | string;
+      const clientIdRaw = fcDoc.client as any as ObjectId | string;
       const client = await resolveClient(clientIdRaw);
 
       // Respond as { facture } (frontend expects fetchFromAPI<{ facture: Facture }>())

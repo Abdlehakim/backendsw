@@ -1,6 +1,5 @@
 // src/jobs/invoiceQueue.ts
 import { Queue } from "bullmq";
-import mongoose from "mongoose";
 import { redis as connection } from "./redis";
 import Order from "@/models/Order";
 
@@ -13,14 +12,7 @@ export const invoiceQueue = new Queue(INVOICE_QUEUE, { connection });
 
 const jobKey = (orderId: string) => `${INVOICE_JOB_ID_PREFIX}${orderId}`;
 
-async function connectDB() {
-  if (mongoose.connection.readyState === 1) return;
-  if (!process.env.MONGODB_URI) throw new Error("MONGODB_URI not set");
-  await mongoose.connect(process.env.MONGODB_URI);
-}
-
 async function isAlreadyInvoiced(orderId: string): Promise<boolean> {
-  await connectDB();
   // If Invoice has select:false in schema, "+Invoice" forces inclusion
   const o = await Order.findById(orderId).select("+Invoice Invoice").lean();
   return !!o?.Invoice;

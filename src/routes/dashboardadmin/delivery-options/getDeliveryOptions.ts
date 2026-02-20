@@ -17,7 +17,7 @@ router.get("/", async (_req: Request, res: Response) => {
       .lean();
 
     /* ---------- map to frontend shape ---------- */
-    const result = options.map((o) => ({
+    const result = (options as any[]).map((o: any) => ({
       _id:          o._id.toString(),
       name:         o.name,
       description:  o.description ?? "",

@@ -19,7 +19,7 @@ router.get("/", requirePermission("M_Stock"), async (req, res) => {
       .lean();
 
     res.json({
-      products: products.map(p => ({ ...p, lastUpdated: p.updatedAt ?? p.createdAt })),
+      products: (products as any[]).map((p: any) => ({ ...p, lastUpdated: p.updatedAt ?? p.createdAt })),
     });
   } catch (err) {
     console.error("Get Products Error:", err);

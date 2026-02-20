@@ -18,7 +18,7 @@ router.get('/postCategories', async (_req: Request, res: Response) => {
       .lean();
 
     const withSubs = await Promise.all(
-      cats.map(async cat => {
+      (cats as any[]).map(async (cat: any) => {
         const subs = await PostSubCategorie
           .find({ postCategorie: cat._id, vadmin: 'approve' })
           .select('_id name slug')
@@ -30,7 +30,7 @@ router.get('/postCategories', async (_req: Request, res: Response) => {
           slug:              cat.slug,
           imageUrl:          cat.imageUrl || null,
           subCategorieCount: subs.length,
-          subcategories:     subs.map(sub => ({
+          subcategories:     (subs as any[]).map((sub: any) => ({
             _id:  sub._id.toString(),
             name: sub.name,
             slug: sub.slug,

@@ -4,7 +4,7 @@
    Creates a facture snapshot from an existing Order.
 ------------------------------------------------------------------ */
 import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
+import { ObjectId } from "@/db/objectId";
 
 import Order, { IOrder } from "@/models/Order";
 import Facture, {
@@ -146,7 +146,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     const { orderId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!ObjectId.isValid(orderId)) {
       res.status(400).json({ message: "Invalid order ID." });
       return;
     }

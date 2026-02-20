@@ -1,7 +1,7 @@
 // src/pages/api/dashboardadmin/stock/subcategories/create.ts
 
 import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
+import { ObjectId } from "@/db/objectId";
 import SubCategorie, { ISubCategorie } from "@/models/stock/SubCategorie";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
 import { memoryUpload } from "@/lib/multer";
@@ -65,14 +65,14 @@ router.post(
       // Create new subcategory
       const newSub = await SubCategorie.create({
         name,
-        categorie: new mongoose.Types.ObjectId(categorieId),
+        categorie: new ObjectId(categorieId),
         iconUrl,
         iconId,
         imageUrl,
         imageId,
         bannerUrl,
         bannerId,
-        createdBy: new mongoose.Types.ObjectId(userId),
+        createdBy: new ObjectId(userId),
       } as unknown as Partial<ISubCategorie>);
 
       res.status(201).json({

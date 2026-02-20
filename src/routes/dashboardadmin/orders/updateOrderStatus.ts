@@ -2,7 +2,7 @@
    backend/src/routes/dashboardadmin/orders/updateOrderStatus.ts
 ------------------------------------------------------------------ */
 import express, { Request, Response } from "express";
-import { Types } from "mongoose";
+import { ObjectId } from "@/db/objectId";
 import Order from "@/models/Order";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
 import { scheduleInvoiceIfNeeded, cancelInvoice } from "@/jobs/invoiceQueue";
@@ -28,7 +28,7 @@ function isAllowedStatus(x: unknown): x is AllowedStatus {
 
 function objectIdToString(id: unknown): string {
   if (typeof id === "string") return id;
-  if (id instanceof Types.ObjectId) return id.toHexString();
+  if (id instanceof ObjectId) return id.toHexString();
   if (id && typeof (id as any).toString === "function") return (id as any).toString();
   return String(id);
 }

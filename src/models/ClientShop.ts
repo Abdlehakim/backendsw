@@ -1,48 +1,23 @@
+import { createCompatModel } from "@/db/mongooseCompat";
 
-/* ------------------------------------------------------------------
-   models/ClientShop.ts
-   Schéma Mongoose (TypeScript) pour les « clients magasin ».
------------------------------------------------------------------- */
-import mongoose, { Document, Model, Schema } from "mongoose";
-
-/* ---------- interface ---------- */
-export interface IClientShop extends Document {
-  _id: mongoose.Types.ObjectId;
+export interface IClientShop {
+  _id: string;
   name: string;
   phone: string;
   email?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-/* ---------- schema ---------- */
-const ClientShopSchema: Schema<IClientShop> = new Schema<IClientShop>(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: false,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Adresse e‑mail invalide"],
-    },
+const ClientShop = createCompatModel({
+  modelName: "ClientShop",
+  delegate: "clientShop",
+  collectionName: "clientshops",
+  beforeSave: (doc) => {
+    if (typeof doc.email === "string") {
+      doc.email = doc.email.toLowerCase().trim();
+    }
   },
-  {
-    timestamps: true,
-  }
-);
-
-/* ---------- model ---------- */
-const ClientShop: Model<IClientShop> = mongoose.model<IClientShop>(
-  "ClientShop",
-  ClientShopSchema
-);
+});
 
 export default ClientShop;

@@ -29,9 +29,9 @@ router.get(
         .lean();
 
       const postsWithCounts = await Promise.all(
-        posts.map(async (p) => ({
+        (posts as any[]).map(async (p: any) => ({
           ...p,
-          commentCount: await (Post as PostModel).commentCount(String(p._id)),
+          commentCount: await (Post as unknown as PostModel).commentCount(String(p._id)),
         })),
       );
 

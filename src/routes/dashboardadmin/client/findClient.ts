@@ -50,21 +50,21 @@ router.get(
 
       /* ---------- merge & normalise ---------- */
       const clients = [
-        ...accounts.map((c) => ({
+        ...(accounts as any[]).map((c: any) => ({
           _id: c._id,
           username: c.username,
           phone: c.phone,
           email: c.email,
           origin: "account" as const,
         })),
-        ...shops.map((s) => ({
+        ...(shops as any[]).map((s: any) => ({
           _id: s._id,
           name: s.name,
           phone: s.phone,
           email: s.email,
           origin: "client shop" as const,
         })),
-        ...companies.map((co) => ({
+        ...(companies as any[]).map((co: any) => ({
           _id: co._id,
           name: co.companyName,
           phone: co.phone,

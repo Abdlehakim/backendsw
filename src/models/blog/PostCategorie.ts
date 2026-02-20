@@ -1,7 +1,8 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-import crypto from 'crypto';
+import { createCompatModel } from "@/db/mongooseCompat";
+import { generateRef, slugify } from "@/models/_helpers";
 
-export interface IPostCategorie extends Document {
+export interface IPostCategorie {
+  _id: string;
   reference: string;
   name: string;
   slug: string;
@@ -11,87 +12,44 @@ export interface IPostCategorie extends Document {
   imageId: string;
   bannerUrl: string;
   bannerId: string;
-  vadmin: 'not-approve' | 'approve';
+  vadmin: "not-approve" | "approve";
   subCategorieCount?: number;
   postCount?: number;
-  createdBy: Types.ObjectId;
-  updatedBy?: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
+  createdBy: string;
+  updatedBy?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const generateCategorieRef = (): string => {
-  const prefix = 'pc';
-  const suffix = crypto.randomBytes(3).toString('hex').toUpperCase();
-  return prefix + suffix;
-};
-
-const slugifyCategorieName = (name: string): string =>
-  name
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '');
-
-const PostCategorieSchema = new Schema<IPostCategorie>(
-  {
-    reference: { type: String, required: true, unique: true },
-    name:      { type: String, required: true, unique: true },
-    slug:      { type: String, unique: true },
-    iconUrl:   { type: String, required: true },
-    iconId:    { type: String, required: true },
-    imageUrl:  { type: String, required: true },
-    imageId:   { type: String, required: true },
-    bannerUrl: { type: String, required: true },
-    bannerId:  { type: String, required: true },
-    vadmin:    { type: String, enum: ['not-approve','approve'], default: 'not-approve' },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'DashboardUser', required: true },
-    updatedBy: { type: Schema.Types.ObjectId, ref: 'DashboardUser', default: null }
+const PostCategorie = createCompatModel({
+  modelName: "PostCategorie",
+  delegate: "postCategorie",
+  collectionName: "postcategories",
+  uniqueFields: ["reference", "name", "slug"],
+  defaults: {
+    vadmin: "not-approve",
+    updatedBy: null,
   },
-  { timestamps: true }
-);
-
-PostCategorieSchema.pre<IPostCategorie>('validate', async function(next) {
-  if (this.isNew) {
-    let ref: string;
-    let exists: IPostCategorie | null;
-    do {
-      ref = generateCategorieRef();
-      exists = await mongoose.models.PostCategorie.findOne({ reference: ref });
-    } while (exists);
-    this.reference = ref;
-  }
-  next();
+  relations: {
+    createdBy: { model: "DashboardUser" },
+    updatedBy: { model: "DashboardUser" },
+    subCategorieCount: {
+      model: "PostSubCategorie",
+      count: true,
+      localField: "_id",
+      foreignField: "postCategorie",
+    },
+    postCount: {
+      model: "Post",
+      count: true,
+      localField: "_id",
+      foreignField: "postCategorie",
+    },
+  },
+  beforeSave: (doc) => {
+    if (!doc.reference) doc.reference = generateRef("pc", "upper");
+    if (doc.name) doc.slug = slugify(String(doc.name));
+  },
 });
-
-PostCategorieSchema.pre<IPostCategorie>('save', function(next) {
-  if (this.isModified('name')) {
-    this.slug = slugifyCategorieName(this.name);
-  }
-  next();
-});
-
-PostCategorieSchema.virtual('subCategorieCount', {
-  ref: 'PostSubCategorie',
-  localField: '_id',
-  foreignField: 'postCategorie',
-  count: true
-});
-
-PostCategorieSchema.virtual('postCount', {
-  ref: 'Post',
-  localField: '_id',
-  foreignField: 'postCategorie',
-  count: true
-});
-
-PostCategorieSchema.set('toJSON', { virtuals: true });
-PostCategorieSchema.set('toObject', { virtuals: true });
-
-const PostCategorie: Model<IPostCategorie> =
-  mongoose.models.PostCategorie ||
-  mongoose.model<IPostCategorie>('PostCategorie', PostCategorieSchema);
 
 export default PostCategorie;

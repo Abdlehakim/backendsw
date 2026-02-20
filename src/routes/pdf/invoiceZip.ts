@@ -19,7 +19,7 @@
 import { Router, type RequestHandler, type Response } from "express";
 import puppeteer, { type Browser, type Page } from "puppeteer";
 import archiver from "archiver";
-import { Types } from "mongoose";
+import { ObjectId } from "@/db/objectId";
 import os from "node:os";
 
 import Facture from "@/models/Facture";
@@ -73,8 +73,8 @@ function toOrderDoc(raw: any): OrderDoc {
 
 function extractClientId(rawClient: any): string | null {
   if (!rawClient) return null;
-  if (typeof rawClient === "string" && Types.ObjectId.isValid(rawClient)) return rawClient;
-  if (rawClient?._id && Types.ObjectId.isValid(rawClient._id)) return String(rawClient._id);
+  if (typeof rawClient === "string" && ObjectId.isValid(rawClient)) return rawClient;
+  if (rawClient?._id && ObjectId.isValid(rawClient._id)) return String(rawClient._id);
   return null;
 }
 
@@ -133,7 +133,7 @@ async function findOrderForFacture(fc: any) {
       }).lean();
     }
   }
-  if (!rawOrder && fc.order && Types.ObjectId.isValid(fc.order)) {
+  if (!rawOrder && fc.order && ObjectId.isValid(fc.order)) {
     rawOrder = await Order.findById(fc.order).lean();
   }
   return rawOrder;

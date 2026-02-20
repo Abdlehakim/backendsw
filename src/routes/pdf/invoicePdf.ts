@@ -7,7 +7,7 @@
 ------------------------------------------------------------------ */
 import { Router, type RequestHandler } from "express";
 import puppeteer, { type Browser } from "puppeteer";
-import { Types } from "mongoose";
+import { ObjectId } from "@/db/objectId";
 
 import Order from "@/models/Order";
 import Facture from "@/models/Facture";
@@ -63,13 +63,13 @@ function toOrderDoc(raw: any): OrderDoc {
 
 function extractClientId(rawClient: any): string | null {
   if (!rawClient) return null;
-  if (Types.ObjectId.isValid(rawClient) && String(rawClient) === String(new Types.ObjectId(rawClient))) {
+  if (ObjectId.isValid(rawClient) && String(rawClient) === String(new ObjectId(rawClient))) {
     return String(rawClient);
   }
-  if (rawClient?._id && Types.ObjectId.isValid(rawClient._id)) {
+  if (rawClient?._id && ObjectId.isValid(rawClient._id)) {
     return String(rawClient._id);
   }
-  if (typeof rawClient === "string" && Types.ObjectId.isValid(rawClient)) {
+  if (typeof rawClient === "string" && ObjectId.isValid(rawClient)) {
     return rawClient;
   }
   return null;

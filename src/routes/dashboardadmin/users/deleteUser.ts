@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
 import DashboardUser from "@/models/dashboardadmin/DashboardUser";
+import { isValidObjectId } from "@/db/objectId";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
 
 const router = Router();
@@ -14,7 +14,7 @@ router.delete("/:userId",
   async (req: Request, res: Response) => {
   const { userId } = req.params;
 
-  if (!mongoose.isValidObjectId(userId)) {
+  if (!isValidObjectId(userId)) {
     res.status(400).json({ message: "Invalid userId." });
     return;
   }

@@ -1,39 +1,39 @@
 import express, { Request, Response } from "express";
-import mongoose from "mongoose";
 import { authenticateToken } from "@/middleware/authenticateToken";
+import { ObjectId } from "@/db/objectId";
 import Order from "@/models/Order";
 
 const router = express.Router();
 
 type DeliveryMethodItem = {
-  deliveryMethodID: mongoose.Types.ObjectId;
+  deliveryMethodID: ObjectId;
   deliveryMethodName?: string;
   Cost: string | number;
   expectedDeliveryDate?: Date;
 };
 
 type PaymentMethodItem = {
-  PaymentMethodID: mongoose.Types.ObjectId;
+  PaymentMethodID: ObjectId;
   PaymentMethodLabel: string;
 };
 
 type OrderLean = {
-  _id: mongoose.Types.ObjectId;
+  _id: ObjectId;
   ref?: string;
-  client: mongoose.Types.ObjectId;
+  client: ObjectId;
   clientName: string;
   DeliveryAddress: Array<{
-    AddressID: mongoose.Types.ObjectId;
+    AddressID: ObjectId;
     DeliverToAddress: string;
   }>;
   pickupMagasin: Array<{
-    MagasinID: mongoose.Types.ObjectId;
+    MagasinID: ObjectId;
     MagasinAddress: string;
     MagasinName?: string;
   }>;
   paymentMethod: PaymentMethodItem[];
   orderItems: Array<{
-    product: mongoose.Types.ObjectId;
+    product: ObjectId;
     reference: string;
     name: string;
     tva: number;

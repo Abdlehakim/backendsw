@@ -41,7 +41,7 @@ router.get(
         .lean()
 
       // 3️⃣ map to the shape your frontend expects
-      const payload = posts.map((p) => ({
+      const payload = (posts as any[]).map((p: any) => ({
         title:            p.title,
         description:      p.description,
         imageUrl:         p.imageUrl,

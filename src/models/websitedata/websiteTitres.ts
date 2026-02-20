@@ -1,22 +1,18 @@
-// models/websitedata/websiteTitres.ts
+import { createCompatModel } from "@/db/mongooseCompat";
 
-import mongoose, { Schema, Document, Model } from 'mongoose';
-
-export interface IwebsiteTitres extends Document {
+export interface IwebsiteTitres {
+  _id: string;
   SimilarProductTitre: string;
   SimilarProductSubTitre: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const websiteTitresSchema = new Schema<IwebsiteTitres>(
-  {
-    SimilarProductTitre:    { type: String, required: true, unique: true },
-    SimilarProductSubTitre: { type: String, required: true, unique: true },
-  },
-  { timestamps: true }
-);
-
-const WebsiteTitres: Model<IwebsiteTitres> =
-  mongoose.models.WebsiteTitres ||
-  mongoose.model<IwebsiteTitres>('WebsiteTitres', websiteTitresSchema);
+const WebsiteTitres = createCompatModel({
+  modelName: "WebsiteTitres",
+  delegate: "websiteTitres",
+  collectionName: "websitetitres",
+  uniqueFields: ["SimilarProductTitre", "SimilarProductSubTitre"],
+});
 
 export default WebsiteTitres;

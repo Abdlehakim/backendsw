@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { Types } from "mongoose";
+import { ObjectId } from "@/db/objectId";
 import Product from "@/models/stock/Product";
 import Categorie from "@/models/stock/Categorie";
 import SubCategorie from "@/models/stock/SubCategorie";
@@ -14,7 +14,7 @@ const VALID_STATUS = new Set(["promotion", "new-products", "best-collection"]);
 
 /** Helpers */
 const toObjectId = (v?: string | null) =>
-  v && Types.ObjectId.isValid(v) ? new Types.ObjectId(v) : undefined;
+  v && ObjectId.isValid(v) ? new ObjectId(v) : undefined;
 
 const clamp = (n: number, min: number, max: number) =>
   Math.max(min, Math.min(n, max));

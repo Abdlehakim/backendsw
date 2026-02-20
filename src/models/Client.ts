@@ -1,62 +1,44 @@
-// models/Client.ts
-import mongoose, { Document, Model, Schema } from 'mongoose';
- import bcrypt from "bcryptjs";
+import { createCompatModel, utils } from "@/db/mongooseCompat";
 
-// Interface for the Client document
-export interface IClient extends Document {
-  _id: mongoose.Types.ObjectId;
+export interface IClient {
+  _id: string;
   username?: string;
   phone?: string;
   email: string;
   password?: string;
-  isGoogleAccount?: boolean;  // Flag to differentiate OAuth accounts
+  isGoogleAccount?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const ClientSchema: Schema<IClient> = new Schema<IClient>(
-  {
-    username: { type: String, required: false },
-    phone: { type: String, required: false },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address'],
-    },
-    password: {
-      type: String,
-      // Only required for non-OAuth users
-      required: function (this: IClient) { return !this.isGoogleAccount; },
-    },
-    isGoogleAccount: {
-      type: Boolean,
-      default: false,
+const Client = createCompatModel({
+  modelName: "Client",
+  delegate: "client",
+  collectionName: "clients",
+  defaults: {
+    isGoogleAccount: false,
+  },
+  uniqueFields: ["email"],
+  beforeSave: async (doc, ctx) => {
+    if (typeof doc.email === "string") {
+      doc.email = doc.email.toLowerCase().trim();
+    }
+    if (doc.password) {
+      const changed = !ctx.previous || doc.password !== ctx.previous.password;
+      const alreadyHashed = /^\$2[aby]\$\d{2}\$/.test(doc.password);
+      if (changed && !alreadyHashed) {
+        const salt = await utils.bcrypt.genSalt(10);
+        doc.password = await utils.bcrypt.hash(doc.password, salt);
+      }
+    }
+  },
+  methods: {
+    async comparePassword(this: IClient, candidatePassword: string) {
+      if (!this.password) return false;
+      return utils.bcrypt.compare(candidatePassword, this.password);
     },
   },
-  {
-    timestamps: true,
-  }
-);
-
-// Pre-save hook to hash the password if it is modified or if it exists
-ClientSchema.pre<IClient>('save', async function (next) {
-  if (this.isModified('password') && this.password) {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-  }
-  next();
 });
-
-// Method to compare passwords for non-OAuth accounts
-ClientSchema.methods.comparePassword = async function (
-  candidatePassword: string
-): Promise<boolean> {
-  if (!this.password) return false;
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-const Client: Model<IClient> = mongoose.model<IClient>('Client', ClientSchema);
 
 export default Client;

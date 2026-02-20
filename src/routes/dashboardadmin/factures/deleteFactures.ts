@@ -4,7 +4,7 @@
    Body: { ids: string[] }  // bulk delete by ids
 ------------------------------------------------------------------ */
 import { Router, Request, Response } from "express";
-import { Types } from "mongoose";
+import { ObjectId } from "@/db/objectId";
 import Facture, { FactureCounter } from "@/models/Facture";
 import Order from "@/models/Order";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
@@ -12,7 +12,7 @@ import { requirePermission } from "@/middleware/requireDashboardPermission";
 const router = Router();
 
 /* Small helpers */
-const isValidId = (s: string) => Types.ObjectId.isValid(s);
+const isValidId = (s: string) => ObjectId.isValid(s);
 
 router.post(
   "/delete",
@@ -47,15 +47,15 @@ router.post(
         .select("_id order year seq ref")
         .lean();
 
-      const existingIdStrs = new Set(existing.map((d) => d._id.toString()));
+      const existingIdStrs = new Set((existing as any[]).map((d: any) => d._id.toString()));
       const notFoundIds = candidateIds.filter((id) => !existingIdStrs.has(id));
 
       // related orders to update
       const orderIds = Array.from(
         new Set(
-          existing
-            .map((d) => d.order && String(d.order))
-            .filter((v): v is string => Boolean(v))
+          (existing as any[])
+            .map((d: any) => d.order && String(d.order))
+            .filter((v: any): v is string => Boolean(v))
         )
       );
 

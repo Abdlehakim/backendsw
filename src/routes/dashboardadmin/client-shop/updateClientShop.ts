@@ -6,14 +6,14 @@
      - PATCH  /update/:id
 ------------------------------------------------------------------ */
 import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
+import { ObjectId } from "@/db/objectId";
 
 import ClientShop from "@/models/ClientShop";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
 
 const router = Router();
 
-const isValidId = (id: string) => mongoose.Types.ObjectId.isValid(id);
+const isValidId = (id: string) => ObjectId.isValid(id);
 
 type Body = {
   name?: string;

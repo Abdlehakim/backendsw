@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
+import { ObjectId, isValidObjectId } from "@/db/objectId";
 
 import Product          from "@/models/stock/Product";
 import ProductAttribute from "@/models/stock/ProductAttribute";
@@ -125,9 +125,9 @@ router.get("/similarById/:id", async (req, res) => {
     const limit    = Number.isFinite(limitRaw) && limitRaw > 0 ? limitRaw : 4;
     const exclude  = String(req.query.exclude || "");
 
-    let objId: mongoose.Types.ObjectId;
+    let objId: ObjectId;
     try {
-      objId = new mongoose.Types.ObjectId(id);
+      objId = new ObjectId(id);
     } catch {
       res.json([]);
       return;
@@ -183,7 +183,7 @@ router.get(
       const { productId } = req.params;
 
       // If you ever want to support slug too, keep this fallback:
-      const byId = mongoose.isValidObjectId(productId);
+      const byId = isValidObjectId(productId);
       const match = byId ? { _id: productId } : { slug: productId };
 
       const doc = await Product.findOne({

@@ -1,7 +1,7 @@
 // src/routes/dashboardadmin/factures/updateStatus.ts
 import express, { Request, Response } from "express";
-import mongoose from "mongoose";
 import Facture from "@/models/Facture";
+import { isValidObjectId } from "@/db/objectId";
 import { requirePermission } from "@/middleware/requireDashboardPermission";
 
 const router = express.Router();
@@ -22,7 +22,7 @@ router.put(
       const { id } = req.params;
       const { status } = req.body as { status?: "Paid" | "Cancelled" };
 
-      if (!mongoose.isValidObjectId(id)) {
+      if (!isValidObjectId(id)) {
         res.status(400).json({ message: "Invalid facture id" });
         return;
       }

@@ -1,8 +1,7 @@
-// models/websitedata/homePageData.ts
+import { createCompatModel } from "@/db/mongooseCompat";
 
-import mongoose, { Schema, Document, Model } from 'mongoose';
-
-export interface IhomePageData extends Document {
+export interface IhomePageData {
+  _id: string;
   HPbannerImgUrl: string;
   HPbannerImgId: string;
   HPbannerTitle: string;
@@ -18,32 +17,31 @@ export interface IhomePageData extends Document {
   HPPromotionSubTitle: string;
   HPBestCollectionTitle: string;
   HPBestCollectionSubTitle: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-const homePageDataSchema = new Schema<IhomePageData>(
-  {
-    HPbannerImgUrl:        { type: String, required: true, unique: true },
-    HPbannerImgId:         { type: String, required: true, unique: true },
-    HPbannerTitle:         { type: String, required: true, unique: true },
-    HPcategorieTitle:      { type: String, required: true, unique: true },
-    HPcategorieSubTitle:   { type: String, required: true, unique: true },
-    HPbrandTitle:          { type: String, required: true, unique: true },
-    HPbrandSubTitle:       { type: String, required: true, unique: true },
-    HPmagasinTitle:       { type: String, required: true, unique: true },
-    HPmagasinSubTitle:    { type: String, required: true, unique: true },
-    HPNewProductTitle:     { type: String, required: true, unique: true },
-    HPNewProductSubTitle:  { type: String, required: true, unique: true },
-    HPPromotionTitle:      { type: String, required: true, unique: true },
-    HPPromotionSubTitle:   { type: String, required: true, unique: true },
-    HPBestCollectionTitle: { type: String, required: true, unique: true },
-    HPBestCollectionSubTitle: { type: String, required: true, unique: true },
-  },
-  { timestamps: true }
-);
-
-
-const HomePageData: Model<IhomePageData> =
-  mongoose.models.HomePageData ||
-  mongoose.model<IhomePageData>('HomePageData', homePageDataSchema);
+const HomePageData = createCompatModel({
+  modelName: "HomePageData",
+  delegate: "homePageData",
+  collectionName: "homepagedata",
+  uniqueFields: [
+    "HPbannerImgUrl",
+    "HPbannerImgId",
+    "HPbannerTitle",
+    "HPcategorieTitle",
+    "HPcategorieSubTitle",
+    "HPbrandTitle",
+    "HPbrandSubTitle",
+    "HPmagasinTitle",
+    "HPmagasinSubTitle",
+    "HPNewProductTitle",
+    "HPNewProductSubTitle",
+    "HPPromotionTitle",
+    "HPPromotionSubTitle",
+    "HPBestCollectionTitle",
+    "HPBestCollectionSubTitle",
+  ],
+});
 
 export default HomePageData;

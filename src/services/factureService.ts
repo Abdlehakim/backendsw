@@ -1,5 +1,4 @@
 // src/services/factureService.ts
-import mongoose from "mongoose";
 import Order from "@/models/Order";
 import Facture from "@/models/Facture";
 
@@ -18,7 +17,7 @@ export async function createFactureFromOrder(orderId: string) {
 
   // idempotency: if already created, exit quietly
   const existing = await Facture.findOne({
-    order: new mongoose.Types.ObjectId(orderId),
+    order: orderId,
   }).lean();
   if (existing)
     return { ok: true as const, already: true as const, ref: existing.ref };
