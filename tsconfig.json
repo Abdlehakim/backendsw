@@ -18,5 +18,5 @@
     "emitDecoratorMetadata": false,
     "experimentalDecorators": false
   },
-  "include": ["src/**/*", "prisma/**/*"]
+  "include": ["src/**/*", "prisma/**/*", "tools/**/*"]
 }
