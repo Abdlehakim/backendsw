@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { Aggregator, Query as MingoQuery } from "mingo";
 import "mingo/init/system";
-import { ObjectId } from "mongodb";
 import prisma from "@/db/prisma";
 
 type PlainObject = Record<string, any>;
@@ -116,18 +116,32 @@ function isObject(value: unknown): value is PlainObject {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
+const OBJECT_ID_HEX_RE = /^[a-f0-9]{24}$/i;
+
+function objectIdLikeToString(value: unknown): string | undefined {
+  if (typeof value === "string") {
+    return OBJECT_ID_HEX_RE.test(value) ? value : undefined;
+  }
+  if (!value || typeof value !== "object") return undefined;
+
+  const toStringFn = (value as { toString?: unknown }).toString;
+  if (typeof toStringFn !== "function") return undefined;
+
+  const stringified = toStringFn.call(value);
+  return typeof stringified === "string" && OBJECT_ID_HEX_RE.test(stringified)
+    ? stringified
+    : undefined;
+}
+
 function isObjectIdLike(value: unknown): boolean {
-  if (!value) return false;
-  if (value instanceof ObjectId) return true;
-  const ctor = (value as any).constructor?.name;
-  return ctor === "ObjectId" && typeof (value as any).toString === "function";
+  return Boolean(objectIdLikeToString(value));
 }
 
 function normalizeValue(value: any): any {
   if (value === null || value === undefined) return value;
   if (value instanceof Date) return new Date(value);
   if (value instanceof RegExp) return new RegExp(value.source, value.flags);
-  if (isObjectIdLike(value)) return value.toString();
+  if (isObjectIdLike(value)) return objectIdLikeToString(value);
   if (value instanceof Map) {
     const out: PlainObject = {};
     for (const [k, v] of value.entries()) out[String(k)] = normalizeValue(v);
@@ -189,7 +203,7 @@ function removeUndefinedFields(input: PlainObject): PlainObject {
 }
 
 function generateObjectId() {
-  return new ObjectId().toString();
+  return randomBytes(12).toString("hex");
 }
 
 function parseSortSpec(sort?: SortSpec): Array<[string, 1 | -1]> {

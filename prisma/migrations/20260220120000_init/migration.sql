@@ -1,4 +1,4 @@
-﻿-- CreateTable
+-- CreateTable
 CREATE TABLE `clients` (
     `id` VARCHAR(24) NOT NULL,
     `data` JSON NOT NULL,

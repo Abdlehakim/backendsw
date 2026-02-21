@@ -1,10 +1,18 @@
-#!/usr/bin/env bash
-set -euo pipefail
-node -r module-alias/register dist/app.js & API_PID=$!
-node -r module-alias/register dist/jobs/invoiceWorker.js & WORKER_PID=$!
-trap "kill -TERM $API_PID $WORKER_PID; wait" TERM INT
-wait -n "$API_PID" "$WORKER_PID"
-EXIT=$?
-kill -TERM "$API_PID" "$WORKER_PID" || true
-wait || true
-exit "$EXIT"
+#!/bin/sh
+set -eu
+
+if [ "${RUN_MODE:-}" = "api" ]; then
+  echo "[entrypoint] RUN_MODE=api"
+  echo "[entrypoint] prisma generate + migrate deploy"
+  npx prisma generate --schema=./prisma/schema.prisma
+  npx prisma migrate deploy --schema=./prisma/schema.prisma
+  exec node -r module-alias/register dist/src/app.js
+fi
+
+if [ "${RUN_MODE:-}" = "worker" ]; then
+  echo "[entrypoint] RUN_MODE=worker"
+  exec node -r module-alias/register dist/src/jobs/invoiceWorker.js
+fi
+
+echo "[entrypoint] ERROR: RUN_MODE must be 'api' or 'worker' (got: '${RUN_MODE:-empty}')"
+exit 1

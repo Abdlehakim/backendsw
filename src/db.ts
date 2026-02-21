@@ -16,7 +16,7 @@ prisma
   .then(() => {
     console.log("Connected to MySQL via Prisma");
   })
-  .catch((err) => {
+  .catch((err: unknown) => {
     console.error("Error connecting to MySQL:", err);
     process.exit(1);
   });

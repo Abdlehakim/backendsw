@@ -1,20 +1,40 @@
-# backend/docker-compose.yml
 services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: backendsw
+      MYSQL_USER: backendsw
+      MYSQL_PASSWORD: backendsw_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
   redis:
     image: redis:7
     restart: unless-stopped
     ports:
-      - "6379:6379"   # optional, for debugging from host
+      - "6379:6379"
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: ./.env.docker   # path is relative to THIS file
+    env_file: ./.env.docker
     environment:
       RUN_MODE: "api"
     depends_on:
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     ports:
       - "3000:3000"
 
@@ -26,4 +46,10 @@ services:
     environment:
       RUN_MODE: "worker"
     depends_on:
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  mysql_data:

@@ -1,31 +1,22 @@
 {
   "compilerOptions": {
-    /* ---------- emit ---------- */
-    "target": "ES2016",          // modern syntax, still widely supported
+    "target": "ES2016",
     "module": "commonjs",
     "outDir": "./dist",
-    "rootDir": "./src",
-
-    /* ---------- type-checking ---------- */
+    "rootDir": ".",
     "strict": true,
-    "skipLibCheck": true,        // don't crawl .d.ts from node_modules
-    "esModuleInterop": true,     // allow `import express from "express"`
-
-    /* ---------- module resolution ---------- */
+    "skipLibCheck": true,
+    "esModuleInterop": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true,   // lets you `import data from "./file.json"`
-
-    /* ---------- path alias ---------- */
-    "baseUrl": "./src",          // all non-relative imports resolve from /src
+    "resolveJsonModule": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"]               // "@/models/User" → "src/models/User"
+      "@/*": ["src/*"]
     },
-
-    /* ---------- source-map & emit helpers (optional) ---------- */
-    "sourceMap": true,           // easier stack traces in dev
+    "types": ["node"],
+    "sourceMap": true,
     "emitDecoratorMetadata": false,
     "experimentalDecorators": false
   },
-
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "prisma/**/*"]
 }
