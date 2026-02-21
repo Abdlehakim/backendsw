@@ -1,17 +1,11 @@
-// src/routes/dashboardadmin/users/dashboardAuth.ts
 import { Router, RequestHandler, Response } from "express";
 import jwt from "jsonwebtoken";
 import DashboardUser from "@/models/dashboardadmin/DashboardUser";
-import {
-  issueToken,
-  setSessionCookies,
-  clearSessionCookies,
-  REFRESH_THRESHOLD_MS,
-} from "./session";
+import DashboardRole from "@/models/dashboardadmin/DashboardRole";
+import { issueToken, setSessionCookies, clearSessionCookies, REFRESH_THRESHOLD_MS } from "./session";
 
 const router = Router();
 
-/* ───────── headers to avoid caching /me ───────── */
 function setNoStore(res: Response) {
   res.set({
     "Cache-Control": "no-store, no-cache, must-revalidate",
@@ -21,7 +15,13 @@ function setNoStore(res: Response) {
   });
 }
 
-/* ───────── GET /api/dashboardAuth/me ───────── */
+function extractId(v: any): string | null {
+  if (!v) return null;
+  if (typeof v === "string") return v;
+  if (typeof v === "object") return String(v._id ?? v.id ?? "");
+  return null;
+}
+
 const getMe: RequestHandler = async (req, res) => {
   try {
     setNoStore(res);
@@ -29,7 +29,6 @@ const getMe: RequestHandler = async (req, res) => {
     const token = req.cookies?.token_FrontEndAdmin;
     if (!token) return void res.status(200).json({ user: null });
 
-    // Verify JWT
     let decoded: { id: string; exp: number };
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; exp: number };
@@ -38,21 +37,22 @@ const getMe: RequestHandler = async (req, res) => {
       return void res.status(200).json({ user: null });
     }
 
-    // Load user
-    const user = await DashboardUser.findById(decoded.id)
-      .select("-password")
-      .populate("role", "name permissions")
-      .lean();
+    const user: any = await DashboardUser.findById(decoded.id).select("-password").lean();
 
     if (!user) {
       clearSessionCookies(res);
       return void res.status(200).json({ user: null });
     }
 
-    // Sliding session: rotate when close to expiry; otherwise just refresh cookie maxAge
+    const roleId = extractId(user.role);
+    if (roleId) {
+      const role: any = await DashboardRole.findById(roleId).select("name permissions").lean();
+      if (role) user.role = role;
+    }
+
     const remainingMs = decoded.exp * 1000 - Date.now();
     if (remainingMs <= REFRESH_THRESHOLD_MS) {
-      const newToken = issueToken(String(user._id));
+      const newToken = issueToken(String(user._id ?? decoded.id));
       setSessionCookies(res, newToken);
     } else {
       setSessionCookies(res, token);
@@ -65,10 +65,6 @@ const getMe: RequestHandler = async (req, res) => {
   }
 };
 
-/* ───────── POST /api/dashboardAuth/logout ─────────
-   Require explicit confirmation so accidental calls don’t log users out.
-   Accepts JSON body {confirm:true} or query ?confirm=1
------------------------------------------------------------------- */
 const logout: RequestHandler = (req, res) => {
   setNoStore(res);
 

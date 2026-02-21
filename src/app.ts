@@ -9,13 +9,25 @@ if (process.env.NODE_ENV !== "production") {
 
 import "./db";
 
-export const isProd = process.env.NODE_ENV === "production";
-export const COOKIE_DOMAIN = isProd ? ".soukelmeuble.tn" : undefined;
+export const isProd = (process.env.NODE_ENV || "development") === "production";
+
+const envCookieDomain = process.env.COOKIE_DOMAIN?.trim();
+const envCookieSecure = process.env.COOKIE_SECURE;
+const envCookieSameSite = process.env.COOKIE_SAMESITE as "lax" | "none" | undefined;
+
+export const COOKIE_DOMAIN = envCookieDomain
+  ? envCookieDomain
+  : isProd
+    ? ".soukelmeuble.tn"
+    : undefined;
+
+const COOKIE_SECURE = envCookieSecure !== undefined ? envCookieSecure === "1" : isProd;
+const COOKIE_SAMESITE = envCookieSameSite ?? (isProd ? "none" : "lax");
 
 export const COOKIE_OPTS = {
   httpOnly: true,
-  secure: isProd,
-  sameSite: isProd ? ("none" as const) : ("lax" as const),
+  secure: COOKIE_SECURE,
+  sameSite: COOKIE_SAMESITE,
   path: "/",
   ...(COOKIE_DOMAIN && { domain: COOKIE_DOMAIN }),
 } as const;
